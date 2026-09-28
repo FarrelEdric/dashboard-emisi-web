@@ -4,7 +4,7 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     username = db.Column(db.String(80), primary_key=True)
     password_hash = db.Column(db.String(255), nullable=False)

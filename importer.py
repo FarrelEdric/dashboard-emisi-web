@@ -20,7 +20,6 @@ TEMPLATE_CSV = ("rute,hemat_nm,hemat_menit,penerbangan_per_hari\n"
                 "CGK-DPS,12.1,1.7,50\n"
                 "CGK-SUB,14.3,2.0,44\n")
 
-
 def seed_if_empty():
     """Jika database kosong, isi dengan data contoh dari data.json (tahun 2025 dan 2026)."""
     if Airport.query.first():
