@@ -74,27 +74,36 @@ def ensure_columns():
 
 
 def ensure_admin():
-    """Buat/perbarui akun admin dari ADMIN_USER dan ADMIN_PASSWORD."""
-    user, pw = os.environ.get("ADMIN_USER", "").strip(), os.environ.get("ADMIN_PASSWORD", "")
-    if not (user and pw):
-        print("[login] PERINGATAN: ADMIN_USER / ADMIN_PASSWORD tidak terbaca")
+    """Pastikan akun admin dari ADMIN_USER sudah ada."""
+    user = os.environ.get("ADMIN_USER", "").strip()
+
+    if not user:
+        print("[login] PERINGATAN: ADMIN_USER tidak terbaca")
         return
+
     row = db.session.get(User, user)
+
     if row:
-        row.password_hash = generate_password_hash(pw)
-        row.role, row.approved = "admin", 1
-    else:
-        db.session.add(User(username=user, password_hash=generate_password_hash(pw), role="admin", approved=1))
+        print(f"[login] akun admin sudah ada: {user}")
+        return
+
+    pw = os.environ.get("ADMIN_PASSWORD", "")
+
+    if not pw:
+        print("[login] PERINGATAN: ADMIN_PASSWORD tidak terbaca")
+        return
+
+    db.session.add(
+        User(
+            username=user,
+            password_hash=generate_password_hash(pw),
+            role="admin",
+            approved=1
+        )
+    )
     db.session.commit()
-    print(f"[login] akun admin aktif: {user}")
 
-
-with app.app_context():
-    db.create_all()   # buat tabel jika belum ada
-    ensure_columns()  # tambah kolom baru jika tabel lama
-    seed_if_empty()   # isi data contoh jika masih kosong
-    ensure_admin()
-
+    print(f"[login] akun admin dibuat: {user}")
 
 # ---------- Keamanan ----------
 def csrf_token():
