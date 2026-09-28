@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin | Dashboard Emisi Karbon</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+<h1>Admin</h1>
+<div class="user"><a class="lnk" href="{{ url_for('dashboard') }}">← Dashboard</a>
+<form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf() }}"><button class="ib" style="font-size:14px;font-weight:600;color:var(--ink)">Logout</button></form></div>
+</header>
+<div class="wrap">
+{% for cat, m in get_flashed_messages(with_categories=true) %}<div class="{{ 'err' if cat == 'error' else 'okm' }}" role="status">{{ m }}</div>{% endfor %}
+
+<section class="card">
+<h2>Pengguna</h2>
+<p class="sub">Akun yang baru mendaftar berstatus "menunggu" sampai kamu menyetujuinya.</p>
+<div class="tb"><table>
+<thead><tr><th>Username</th><th>Peran</th><th>Status</th><th>Aksi</th></tr></thead>
+<tbody>
+{% for u in users %}
+<tr>
+<td>{{ u.username }}</td><td>{{ u.role }}</td>
+<td>{% if u.approved %}aktif{% else %}<b class="wait">menunggu</b>{% endif %}</td>
+<td class="acts">
+{% if not u.approved %}<form method="post" action="{{ url_for('admin_approve', username=u.username) }}"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}"><button class="sm">Setujui</button></form>{% endif %}
+{% if u.role != 'admin' %}<form method="post" action="{{ url_for('admin_delete_user', username=u.username) }}" onsubmit="return confirm('Hapus akun {{ u.username }}?')"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}"><button class="sm dng">{% if u.approved %}Hapus{% else %}Tolak{% endif %}</button></form>{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+
+<section class="card">
+<h2>Unggah data (Excel atau CSV)</h2>
+<p class="sub">Excel: format seperti sheet RNAV (kolom A rute, C hemat Nm, E hemat menit, F penerbangan per hari). CSV: header <code>rute,hemat_nm,hemat_menit,penerbangan_per_hari</code>. <a href="{{ url_for('template_csv') }}">Unduh contoh CSV</a></p>
+<form method="post" action="{{ url_for('admin_import') }}" enctype="multipart/form-data" class="fg">
+<input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}">
+<div><label for="f">File (.xlsx / .csv)</label><input id="f" name="file" type="file" accept=".xlsx,.csv" required></div>
+<div><label for="iy">Tahun</label><input id="iy" name="year" type="number" value="{{ year }}" min="2020" max="2100" required></div>
+<div><label for="iq">Triwulan</label><select id="iq" name="quarter"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+<div><button class="btn">Unggah</button></div>
+</form>
+</section>
+
+<section class="card">
+<h2>Bandara</h2>
+<p class="sub">Terdaftar: {% for a in airports %}<b>{{ a.code }}</b>{% if not loop.last %}, {% endif %}{% endfor %}. Kode yang sudah ada akan diperbarui.</p>
+<form method="post" action="{{ url_for('admin_airport') }}" class="fg">
+<input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}">
+<div><label for="ac">Kode (3 huruf)</label><input id="ac" name="code" maxlength="3" required></div>
+<div><label for="an">Nama</label><input id="an" name="name" required maxlength="120"></div>
+<div><label for="al">Lintang</label><input id="al" name="lat" type="number" step="any" required></div>
+<div><label for="ao">Bujur</label><input id="ao" name="lon" type="number" step="any" required></div>
+<div><button class="btn">Simpan bandara</button></div>
+</form>
+</section>
+
+<section class="card">
+<h2>Rute</h2>
+<form method="post" action="{{ url_for('admin_route') }}" class="fg">
+<input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}">
+<div><label for="ro">Asal</label><select id="ro" name="origin">{% for a in airports %}<option value="{{ a.code }}">{{ a.code }}</option>{% endfor %}</select></div>
+<div><label for="rd">Tujuan</label><select id="rd" name="dest">{% for a in airports %}<option value="{{ a.code }}">{{ a.code }}</option>{% endfor %}</select></div>
+<div><label for="rn">Hemat jarak (Nm)</label><input id="rn" name="saving_nm" type="number" step="any" required></div>
+<div><label for="rm">Hemat waktu (menit)</label><input id="rm" name="saving_min" type="number" step="any" required></div>
+<div><button class="btn">Simpan rute</button></div>
+</form>
+</section>
+
+<section class="card">
+<h2>Penerbangan per hari</h2>
+<form method="post" action="{{ url_for('admin_flights') }}" class="fg">
+<input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}">
+<div><label for="fr">Rute</label><select id="fr" name="route_id">{% for r in routes %}<option value="{{ r.id }}">{{ r.origin }}-{{ r.dest }}</option>{% endfor %}</select></div>
+<div><label for="fy">Tahun</label><input id="fy" name="year" type="number" value="{{ year }}" min="2020" max="2100" required></div>
+<div><label for="fq">Triwulan</label><select id="fq" name="quarter"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+<div><label for="ff">Penerbangan/hari</label><input id="ff" name="flights" type="number" step="any" min="0" required></div>
+<div><button class="btn">Simpan</button></div>
+</form>
+</section>
+
+<section class="card">
+<h2>Data saat ini</h2>
+<form method="get" action="{{ url_for('admin') }}" class="fg one"><div><label for="vy">Lihat tahun</label><input id="vy" name="year" type="number" value="{{ year }}" min="2020" max="2100"></div><div><button class="btn">Tampilkan</button></div></form>
+<div class="tb"><table>
+<thead><tr><th>Rute</th><th>Hemat Nm</th><th>Hemat menit</th><th>TW I</th><th>TW II</th><th>TW III</th><th>TW IV</th><th></th></tr></thead>
+<tbody>
+{% for r in routes %}{% set f = flights.get(r.id, [0,0,0,0]) %}
+<tr><td>{{ r.origin }}-{{ r.dest }}</td><td>{{ r.saving_nm }}</td><td>{{ r.saving_min }}</td><td>{{ f[0]|round(1) }}</td><td>{{ f[1]|round(1) }}</td><td>{{ f[2]|round(1) }}</td><td>{{ f[3]|round(1) }}</td>
+<td><form method="post" action="{{ url_for('admin_delete_route', route_id=r.id) }}" onsubmit="return confirm('Hapus rute {{ r.origin }}-{{ r.dest }} beserta data penerbangannya?')"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="view_year" value="{{ year }}"><button class="sm dng">Hapus</button></form></td></tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+</div>
+</body>
+</html>

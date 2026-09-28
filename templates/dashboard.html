@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Emisi Karbon Penerbangan</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+<h1>Emisi Karbon Penerbangan</h1>
+<div class="user"><button class="ib" id="th" aria-label="Ganti tema">☀︎</button>{% if is_admin %}<a class="lnk" href="{{ url_for('admin') }}">Admin</a>{% endif %}<div><small>{{ username }}</small>{{ 'Admin' if is_admin else 'General User' }}</div><div class="av">{{ username[:2]|upper }}</div>
+<form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf() }}"><button class="ib" style="font-size:14px;font-weight:600">Logout</button></form></div>
+</header>
+<main>
+<section class="card">
+<div class="row"><label for="dep">Bandara asal</label><select id="dep"></select></div>
+<div class="row"><label for="dst">Tujuan</label><select id="dst"></select></div>
+<button class="btn" id="go">Tampilkan rute</button>
+
+<h2>Kalkulator emisi karbon</h2>
+<p class="sub" id="rt"></p>
+<div class="row"><label for="sd">Hemat jarak (Nm)</label><input id="sd" type="number" step="0.1"></div>
+<div class="row"><label for="tm">Hemat waktu (mnt)</label><input id="tm" type="number" step="0.1"></div>
+<div class="row"><label for="fl">Flt per hari</label><input id="fl" type="number"></div>
+<div class="row"><label for="dy">Jumlah hari</label><input id="dy" readonly></div>
+<div class="res" id="out"></div>
+
+<p class="sec">Asumsi dari Excel</p>
+<div class="row"><label for="fb">BBM (kg/km)</label><input id="fb" type="number" step="0.01" value="3.59"></div>
+<div class="row"><label for="ef">kg CO₂/kg BBM</label><input id="ef" type="number" step="0.01" value="3.15"></div>
+<div class="row"><label for="ci">CI ($/menit)</label><input id="ci" type="number" value="25"></div>
+<div class="row"><label for="fx">Kurs (Rp/USD)</label><input id="fx" type="number" value="15600"></div>
+<p class="note">CO₂ = Nm × 1,852 × flt/hari × hari × kg BBM/km × kg CO₂/kg BBM. Biaya = menit × CI × flt/hari × hari × kurs.</p>
+</section>
+
+<section>
+<div class="card">
+<div class="map"><div id="map"></div></div>
+<p class="note">Klik garis rute di peta (atau baris perbandingan di bawah) untuk memilih rute.</p>
+<h2 style="border:0;margin-top:18px;padding:0">CO₂ dikurangi per bulan pada rute ini</h2>
+<p class="sub" id="cs"></p>
+<svg id="chart" viewBox="0 0 800 175"></svg>
+<h2>Perbandingan CO₂ dikurangi antar rute</h2>
+<p class="sub" id="tt"></p>
+<div class="cmp" id="cmp"></div>
+</div>
+<div class="bar">
+<div><label for="yr">Tahun</label><select id="yr"><option>2025</option><option selected>2026</option></select></div>
+<div><label for="tw">Triwulan</label><select id="tw"><option value="0">Semua</option><option value="1">TW I</option><option value="2" selected>TW II</option><option value="3">TW III</option><option value="4">TW IV</option></select></div>
+<div><label for="bl">Bulan</label><select id="bl"></select></div>
+<button class="btn" id="calc">Hitung emisi</button>
+</div>
+<p class="note">Penerbangan per hari dari Excel (rata-rata triwulan), dikalikan jumlah hari pada periode yang dipilih.</p>
+</section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
