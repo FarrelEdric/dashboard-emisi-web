@@ -4,11 +4,22 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
+    __tablename__ = "users"
+
     username = db.Column(db.String(80), primary_key=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(10), nullable=False, default="user", server_default="user")  # "admin" atau "user"
-    approved = db.Column(db.Integer, nullable=False, default=0, server_default="0")          # 1 = boleh login
-
+    role = db.Column(
+        db.String(10),
+        nullable=False,
+        default="user",
+        server_default="user"
+    )
+    approved = db.Column(
+        db.Integer,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
 
 class Airport(db.Model):
     code = db.Column(db.String(3), primary_key=True)  # kode IATA, mis. CGK

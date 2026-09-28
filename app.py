@@ -58,8 +58,8 @@ db.init_app(app)
 # ---------- Persiapan database ----------
 def ensure_columns():
     """Tambah kolom baru ke tabel user yang sudah ada (create_all tidak mengubah tabel lama)."""
-    cols = {c["name"] for c in inspect(db.engine).get_columns("user")}
-    table = db.engine.dialect.identifier_preparer.quote("user")
+    cols = {c["name"] for c in inspect(db.engine).get_columns("users")}
+    table = db.engine.dialect.identifier_preparer.quote("users")
     stmts = []
     if "role" not in cols:
         stmts.append(f"ALTER TABLE {table} ADD COLUMN role VARCHAR(10) NOT NULL DEFAULT 'user'")
