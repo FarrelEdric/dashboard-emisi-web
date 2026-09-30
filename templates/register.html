@@ -1,26 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Daftar | Dashboard Emisi Karbon</title>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body class="lg">
-<form method="post">
-<h1>Buat akun</h1>
-<p>Akun baru harus disetujui admin sebelum bisa masuk.</p>
-{% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
-<input type="hidden" name="csrf" value="{{ csrf() }}">
-<label for="u">Username</label>
-<input id="u" name="username" required autofocus autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" title="Huruf, angka, atau garis bawah">
-<label for="p">Password (minimal 8 karakter)</label>
-<input id="p" name="password" type="password" required minlength="8" autocomplete="new-password">
-<label for="p2">Ulangi password</label>
-<input id="p2" name="password2" type="password" required minlength="8" autocomplete="new-password">
-<button class="btn">Daftar</button>
-<p class="alt">Sudah punya akun? <a href="{{ url_for('login') }}">Masuk</a></p>
-</form>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Daftar | Dashboard Emisi Karbon</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="lg">
+    <form method="post">
+      <div class="brand brand-auth" aria-label="AirNav Indonesia logo">
+        <div class="brand-mark">
+          <img
+            class="brand-logo"
+            src="https://www.airnavindonesia.co.id/wp-content/uploads/2024/09/LOGOAIRNAVINDONESIALandscape.png"
+            alt="AirNav Indonesia"
+          />
+        </div>
+      </div>
+      <h1>Buat akun</h1>
+      <p>Akun baru harus disetujui admin sebelum bisa masuk.</p>
+      {% if error %}
+      <div class="err" role="alert">{{ error }}</div>
+      {% endif %}
+      <input type="hidden" name="csrf" value="{{ csrf() }}" />
+      <label for="u">Username</label>
+      <input
+        id="u"
+        name="username"
+        required
+        autofocus
+        autocomplete="username"
+        minlength="3"
+        maxlength="30"
+        pattern="[A-Za-z0-9_]+"
+        title="Huruf, angka, atau garis bawah"
+      />
+      <label for="p">Password (minimal 8 karakter)</label>
+      <input
+        id="p"
+        name="password"
+        type="password"
+        required
+        minlength="8"
+        autocomplete="new-password"
+      />
+      <label for="p2">Ulangi password</label>
+      <input
+        id="p2"
+        name="password2"
+        type="password"
+        required
+        minlength="8"
+        autocomplete="new-password"
+      />
+      <button class="btn">Daftar</button>
+      <p class="alt">
+        Sudah punya akun? <a href="{{ url_for('login') }}">Masuk</a>
+      </p>
+    </form>
+  </body>
 </html>

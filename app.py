@@ -51,6 +51,8 @@ app.config.update(
     SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE") == "1",  # aktifkan di hosting (HTTPS)
     PERMANENT_SESSION_LIFETIME=8 * 3600,  # login berlaku 8 jam
     MAX_CONTENT_LENGTH=2 * 1024 * 1024,   # unggahan maksimal 2 MB
+    SEND_FILE_MAX_AGE_DEFAULT=0,
+    TEMPLATES_AUTO_RELOAD=True,
 )
 db.init_app(app)
 
@@ -176,7 +178,11 @@ def admin_required(view):
 
 @app.after_request
 def no_cache(resp):
-    if not request.path.startswith("/static"):
+    if request.path.startswith("/static"):
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+    else:
         resp.headers["Cache-Control"] = "no-store"
     return resp
 
