@@ -77,22 +77,12 @@ def ensure_columns():
 
 def ensure_admin():
     """Pastikan akun admin dari ADMIN_USER sudah ada."""
-    user = os.environ.get("ADMIN_USER", "").strip()
-
-    if not user:
-        print("[login] PERINGATAN: ADMIN_USER tidak terbaca")
-        return
+    user = (os.environ.get("ADMIN_USER") or "admin").strip()
+    pw = os.environ.get("ADMIN_PASSWORD") or "admin"
 
     row = db.session.get(User, user)
-
     if row:
         print(f"[login] akun admin sudah ada: {user}")
-        return
-
-    pw = os.environ.get("ADMIN_PASSWORD", "")
-
-    if not pw:
-        print("[login] PERINGATAN: ADMIN_PASSWORD tidak terbaca")
         return
 
     db.session.add(
@@ -104,8 +94,15 @@ def ensure_admin():
         )
     )
     db.session.commit()
-
     print(f"[login] akun admin dibuat: {user}")
+
+
+with app.app_context():
+    db.create_all()
+    ensure_columns()
+    ensure_admin()
+    seed_if_empty()
+
 
 # ---------- Keamanan ----------
 def csrf_token():
@@ -471,4 +468,5 @@ def template_csv():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)  # hanya untuk di komputer sendiri
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
