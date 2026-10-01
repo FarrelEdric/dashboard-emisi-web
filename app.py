@@ -27,6 +27,10 @@ def database_config():
     """Tentukan database. Kosong = SQLite di komputer. Isi DATABASE_URL = database online (Neon dll)."""
     raw = (os.environ.get("DATABASE_URL") or "").strip()  # strip: buang spasi/enter yang ikut tersalin
     if not raw:
+        # Vercel: folder proyek hanya-baca, satu-satunya tempat yang bisa ditulis
+        # adalah /tmp. Tanpa ini SQLite gagal dibuka ("unable to open database file").
+        if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+            return "sqlite:////tmp/dashboard.db", {}
         return "sqlite:///" + str(BASE / "dashboard.db"), {}
     url, args = make_url(raw), {}
     if url.get_backend_name() in ("postgres", "postgresql"):
