@@ -434,6 +434,12 @@ function showSelectedRoute() {
 $("dep").onchange = () => {
   resultVisible = false;
   const l = fillDst();
+  if (!l.length) {
+    // tidak ada rute sama sekali untuk asal ini: jangan biarkan label rute dan
+    // grafik masih menampilkan pilihan sebelumnya (konten basi)
+    empty($("dep").value, "—");
+    return;
+  }
   // kalau tujuan sebelumnya tidak punya rute dengan asal yang baru, pilih tujuan
   // pertama yang tersedia — jadi tombol "Tampilkan rute" selalu bisa dipakai
   if (!$("dst").value && l.length) {
