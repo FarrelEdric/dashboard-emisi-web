@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Login | Dashboard Emisi Karbon</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="static/img/favicon.png"
+    />
+    <link
+      rel="stylesheet"
+      href="static/fonts/exo2.css"
+    />
+    <link
+      rel="stylesheet"
+      href="static/style.css"
+    />
+  </head>
+  <body class="lg">
+    <form method="post">
+      <div class="brand brand-auth" aria-label="AirNav Indonesia logo">
+        <div class="brand-mark">
+          <img
+            class="brand-logo"
+            src="static/img/logo-airnav.png"
+            alt="AirNav Indonesia"
+          />
+        </div>
+      </div>
+      <h1>Dashboard Emisi Karbon</h1>
+       
+      <input type="hidden" name="csrf" value="f7f7232bba41de5a5f333ce48b0605a3" />
+      <label for="u">Username</label>
+      <input
+        id="u"
+        name="username"
+        required
+        autofocus
+        autocomplete="username"
+      />
+      <label for="p">Password</label>
+      <input
+        id="p"
+        name="password"
+        type="password"
+        required
+        autocomplete="current-password"
+      />
+      <button class="btn">Masuk</button>
+      <p class="alt">
+        Belum punya akun? <a href="register.html">Daftar</a>
+      </p>
+    </form>
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0b3a5c;color:#fff;
+font:14px/1.5 system-ui,sans-serif;padding:10px 16px;text-align:center">
+<strong>Demo statis</strong> — dibuat dari dashboard asli. Login, pendaftaran akun, dan penyimpanan data
+tidak aktif karena ini hosting statis GitHub Pages. Data yang tampil adalah data nyata dari database lokal.
+</div>
+</body>
+</html>

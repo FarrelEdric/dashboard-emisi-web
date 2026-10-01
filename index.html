@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Dashboard Emisi Karbon Penerbangan</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="static/img/favicon.png"
+    />
+    <link
+      rel="stylesheet"
+      href="static/fonts/exo2.css"
+    />
+    <link
+      rel="stylesheet"
+      href="static/vendor/leaflet/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="static/vendor/maplibre/maplibre-gl.css"
+    />
+    <link
+      rel="stylesheet"
+      href="static/style.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="brand" aria-label="AirNav Indonesia logo">
+        <div class="brand-mark">
+          <img
+            class="brand-logo"
+            src="static/img/logo-airnav.png"
+            alt="AirNav Indonesia"
+          />
+        </div>
+      </div>
+      <div class="page-title">
+        <small>Air Traffic Carbon Emission Performance</small>
+        <h1>Emisi Karbon Penerbangan</h1>
+      </div>
+      <div class="user">
+        <a class="lnk" href="admin.html">Admin</a
+        >
+        <div>
+          <small>admin</small>Admin
+        </div>
+        <div class="av">AD</div>
+        <form method="post" action="/logout">
+          <input type="hidden" name="csrf" value="f96b63941ef026f549cbd56249a6872a" /><button
+            class="ib"
+            style="font-size: 14px; font-weight: 600"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+    </header>
+    <div class="route-panel card" aria-label="Pemilihan bandara">
+      <div class="route-grid">
+        <div class="row">
+          <label for="dep">Bandara asal</label
+          ><select id="dep"></select>
+        </div>
+        <div class="row">
+          <label for="dst">Tujuan</label
+          ><select id="dst"></select>
+        </div>
+        <button class="btn" id="go">Tampilkan rute</button>
+      </div>
+    </div>
+
+    <main class="dashboard-grid">
+      <section class="content-panel card">
+        <div class="content-split">
+          <div class="calc-panel">
+            <h2>Kalkulator emisi karbon</h2>
+            <p class="sub" id="rt"></p>
+            <div class="row">
+              <label for="sd">Hemat jarak (Nm)</label
+              ><input id="sd" type="number" step="0.1" />
+            </div>
+            <div class="row">
+              <label for="tm">Hemat waktu (mnt)</label
+              ><input id="tm" type="number" step="0.1" />
+            </div>
+            <div class="row">
+              <label for="fl">Flt per hari</label
+              ><input id="fl" type="number" />
+            </div>
+            <div class="row">
+              <label for="dy">Jumlah hari</label><input id="dy" readonly />
+            </div>
+            <div class="res" id="out"></div>
+
+            <button class="btn btn-ghost" id="toggle-assumptions" type="button">
+              Tampilkan asumsi
+            </button>
+            <div class="assumptions hidden" id="assumptions-panel">
+              <p class="sec">Asumsi dasar</p>
+              <div class="row">
+                <label for="fb">BBM (kg/km)</label>
+                <input id="fb" type="number" step="0.01" value="3.59" />
+              </div>
+              <div class="row">
+                <label for="ef">kg CO₂/kg BBM</label>
+                <input id="ef" type="number" step="0.01" value="3.15" />
+              </div>
+              <div class="row">
+                <label for="ci">CI ($/menit)</label>
+                <input id="ci" type="number" value="25" />
+              </div>
+              <div class="row">
+                <label for="fx">Kurs (Rp/USD)</label>
+                <input id="fx" type="number" value="15600" />
+              </div>
+            </div>
+          </div>
+
+          <div class="map-panel">
+            <div class="bar top-bar">
+              <div>
+                <label for="yr">Tahun</label
+                ><select id="yr">
+                  <option>2025</option>
+                  <option selected>2026</option>
+                </select>
+              </div>
+              <div>
+                <label for="tw">Triwulan</label
+                ><select id="tw">
+                  <option value="0">Semua</option>
+                  <option value="1">TW I</option>
+                  <option value="2" selected>TW II</option>
+                  <option value="3">TW III</option>
+                  <option value="4">TW IV</option>
+                </select>
+              </div>
+              <div>
+                <label for="bl">Bulan</label
+                ><select id="bl"></select>
+              </div>
+              <button class="btn" id="calc">Hitung emisi</button>
+            </div>
+
+            <div class="map"><div id="map"></div></div>
+            <div class="map-foot">
+              <p class="note">
+                Pilih rute lewat Bandara asal dan Tujuan di atas, lalu klik
+                Tampilkan rute. Geser dan zoom peta seperti peta biasa; arahkan
+                kursor ke titik bandara untuk melihat namanya.
+              </p>
+              <label class="switch" for="ap-toggle">
+                <span>Titik bandara</span>
+                <input type="checkbox" id="ap-toggle" checked />
+                <i aria-hidden="true"></i>
+              </label>
+            </div>
+            <section class="analysis-section">
+              <div class="section-header">
+                <h2>CO₂ dikurangi per bulan</h2>
+              </div>
+              <p class="sub" id="cs"></p>
+              <div class="chart-block">
+                <div class="summary">
+                  <div class="sum-card">
+                    <span>Total CO₂ dikurangi</span>
+                    <b id="sum-co2">—</b>
+                    <small id="sum-co2-note"></small>
+                  </div>
+                  <div class="sum-card">
+                    <span>Total penghematan</span>
+                    <b id="sum-idr">—</b>
+                    <small id="sum-idr-note"></small>
+                  </div>
+                </div>
+                <div class="chart-box">
+                  <svg id="chart" viewBox="0 0 800 175"></svg>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="static/vendor/leaflet/leaflet.js"></script>
+    <script src="static/vendor/maplibre/maplibre-gl.js"></script>
+    <script src="static/vendor/maplibre/leaflet-maplibre-gl.js"></script>
+    <script>window.__realFetch = window.fetch.bind(window);</script>
+<script>
+var __api = {"airports": {"CGK": ["Soekarno-Hatta", -6.1256, 106.6558, 0, 0, "CGK"], "DPS": ["Ngurah Rai", -8.7482, 115.1672, 0, 0, "DPS"], "SUB": ["Juanda", -7.3798, 112.7869, 0, 0, "SUB"], "LBJ": ["Komodo", -8.4867, 119.8891, 0, 0, "LBJ"], "KNO": ["Kualanamu", 3.6378, 98.8853, 0, 0, "KNO"], "UPG": ["Sultan Hasanuddin", -5.0616, 119.554, 0, 0, "UPG"], "BPN": ["Sultan Aji Muhammad Sulaiman", -1.2683, 116.8944, 0, 0, "BPN"], "MDC": ["Sam Ratulangi", 1.5492, 124.9264, 0, 0, "MDC"]}, "routes": [["CGK", "DPS", 670, 52, [5, 6, 7, 8]], ["CGK", "SUB", 420, 33, [8, 9, 9, 10]], ["CGK", "KNO", 510, 41, [4, 5, 5, 6]], ["CGK", "UPG", 480, 38, [3, 4, 4, 5]], ["CGK", "BPN", 430, 35, [2, 3, 3, 3]], ["CGK", "MDC", 720, 58, [2, 2, 3, 3]], ["DPS", "LBJ", 210, 17, [3, 3, 4, 4]], ["SUB", "UPG", 320, 26, [2, 3, 3, 4]], ["DPS", "UPG", 260, 21, [1, 2, 2, 2]]], "years": [2025, 2026]};
+window.fetch = function (url) {
+  if (String(url).indexOf("/api/data") < 0) return window.__realFetch(url);
+  return Promise.resolve({status: 200, json: function () {
+    return Promise.resolve(__api);
+  }});
+};
+</script>
+<script src="static/app.js"></script>
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0b3a5c;color:#fff;
+font:14px/1.5 system-ui,sans-serif;padding:10px 16px;text-align:center">
+<strong>Demo statis</strong> — dibuat dari dashboard asli. Login, pendaftaran akun, dan penyimpanan data
+tidak aktif karena ini hosting statis GitHub Pages. Data yang tampil adalah data nyata dari database lokal.
+</div>
+</body>
+</html>

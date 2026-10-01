@@ -1,0 +1,1875 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Admin | Dashboard Emisi Karbon</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="static/img/favicon.png"
+    />
+    <link
+      rel="stylesheet"
+      href="static/fonts/exo2.css"
+    />
+    <link
+      rel="stylesheet"
+      href="static/style.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="brand" aria-label="AirNav Indonesia logo">
+        <div class="brand-mark">
+          <img
+            class="brand-logo"
+            src="static/img/logo-airnav.png"
+            alt="AirNav Indonesia"
+          />
+        </div>
+      </div>
+      <div class="page-title">
+        <small>Operations Admin</small>
+        <h1>Admin</h1>
+      </div>
+      <div class="user">
+        <a class="lnk" href="index.html">← Dashboard</a>
+        <form method="post" action="/logout">
+          <input type="hidden" name="csrf" value="090c2d314618e0f3278c2a3dd0ab69eb" /><button
+            class="ib"
+            style="font-size: 14px; font-weight: 600; color: var(--ink)"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+    </header>
+    <div class="wrap">
+      
+
+      <section class="card">
+        <h2>Pengguna</h2>
+        <p class="sub">
+          Akun yang baru mendaftar berstatus "menunggu" sampai kamu
+          menyetujuinya.
+        </p>
+        <div class="tb">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Peran</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr>
+                <td>tifa</td>
+                <td>user</td>
+                <td>
+                  <b class="wait">menunggu</b
+                  >
+                </td>
+                <td class="acts">
+                  
+                  <form
+                    method="post"
+                    action="/admin/user/tifa/approve"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm">Setujui</button>
+                  </form>
+                   
+                  <form
+                    method="post"
+                    action="/admin/user/tifa/delete"
+                    onsubmit="return confirm('Hapus akun tifa?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">
+                      Tolak
+                    </button>
+                  </form>
+                  
+                </td>
+              </tr>
+              
+              <tr>
+                <td>admin</td>
+                <td>admin</td>
+                <td>
+                  aktif
+                </td>
+                <td class="acts">
+                   
+                </td>
+              </tr>
+              
+              <tr>
+                <td>tifani</td>
+                <td>user</td>
+                <td>
+                  aktif
+                </td>
+                <td class="acts">
+                   
+                  <form
+                    method="post"
+                    action="/admin/user/tifani/delete"
+                    onsubmit="return confirm('Hapus akun tifani?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">
+                      Hapus
+                    </button>
+                  </form>
+                  
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Unggah data (Excel atau CSV)</h2>
+        <p class="sub">
+          Excel: format seperti sheet RNAV (kolom A rute, C hemat Nm, E hemat
+          menit, F penerbangan per hari). CSV: header
+          <code>rute,hemat_nm,hemat_menit,penerbangan_per_hari</code>.
+          <a href="/admin/template.csv">Unduh contoh CSV</a>
+        </p>
+        <form
+          method="post"
+          action="/admin/import"
+          enctype="multipart/form-data"
+          class="fg"
+        >
+          <input type="hidden" name="csrf" value="090c2d314618e0f3278c2a3dd0ab69eb" /><input
+            type="hidden"
+            name="view_year"
+            value="2026"
+          />
+          <div>
+            <label for="f">File (.xlsx / .csv)</label
+            ><input
+              id="f"
+              name="file"
+              type="file"
+              accept=".xlsx,.csv"
+              required
+            />
+          </div>
+          <div>
+            <label for="iy">Tahun</label
+            ><input
+              id="iy"
+              name="year"
+              type="number"
+              value="2026"
+              min="2020"
+              max="2100"
+              required
+            />
+          </div>
+          <div>
+            <label for="iq">Triwulan</label
+            ><select id="iq" name="quarter">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+            </select>
+          </div>
+          <div><button class="btn">Unggah</button></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Bandara</h2>
+        <p class="sub">
+          Terdaftar: <b>AAP</b>, <b>AAS</b>, <b>ABU</b>, <b>AEG</b>, <b>AGD</b>, <b>AHI</b>, <b>AKQ</b>, <b>AMQ</b>, <b>APD</b>, <b>ARD</b>, <b>AXO</b>, <b>AYW</b>, <b>BDJ</b>, <b>BDO</b>, <b>BEJ</b>, <b>BIK</b>, <b>BJK</b>, <b>BJW</b>, <b>BKS</b>, <b>BMU</b>, <b>BPN</b>, <b>BQR</b>, <b>BRG</b>, <b>BTH</b>, <b>BTJ</b>, <b>BTW</b>, <b>BUI</b>, <b>BUU</b>, <b>BUW</b>, <b>BWX</b>, <b>BXB</b>, <b>BXD</b>, <b>BXM</b>, <b>BXT</b>, <b>BXW</b>, <b>CBN</b>, <b>CGK</b>, <b>CJN</b>, <b>CPF</b>, <b>CXP</b>, <b>DEX</b>, <b>DHX</b>, <b>DJB</b>, <b>DJJ</b>, <b>DOB</b>, <b>DPS</b>, <b>DRH</b>, <b>DTB</b>, <b>DTD</b>, <b>DUM</b>, <b>ELR</b>, <b>ENE</b>, <b>ENG</b>, <b>EWE</b>, <b>EWI</b>, <b>FKQ</b>, <b>FLZ</b>, <b>FOO</b>, <b>FSH</b>, <b>GAV</b>, <b>GEB</b>, <b>GHS</b>, <b>GLX</b>, <b>GNS</b>, <b>GTO</b>, <b>GXM</b>, <b>GYO</b>, <b>HLM</b>, <b>HLP</b>, <b>HMS</b>, <b>IAX</b>, <b>ILA</b>, <b>INX</b>, <b>IUL</b>, <b>JBB</b>, <b>JHN</b>, <b>JIO</b>, <b>JOG</b>, <b>KAZ</b>, <b>KBF</b>, <b>KBU</b>, <b>KBX</b>, <b>KCD</b>, <b>KDI</b>, <b>KEI</b>, <b>KEQ</b>, <b>KJT</b>, <b>KJX</b>, <b>KLP</b>, <b>KMM</b>, <b>KNG</b>, <b>KNO</b>, <b>KOD</b>, <b>KOE</b>, <b>KOX</b>, <b>KRC</b>, <b>KSR</b>, <b>KTG</b>, <b>KWB</b>, <b>KXB</b>, <b>LAH</b>, <b>LBJ</b>, <b>LBW</b>, <b>LHI</b>, <b>LII</b>, <b>LKA</b>, <b>LKI</b>, <b>LKM</b>, <b>LLJ</b>, <b>LLN</b>, <b>LLO</b>, <b>LMU</b>, <b>LNU</b>, <b>LOP</b>, <b>LPU</b>, <b>LSR</b>, <b>LSW</b>, <b>LSX</b>, <b>LUV</b>, <b>LUW</b>, <b>LWE</b>, <b>LYK</b>, <b>MAL</b>, <b>MDC</b>, <b>MDP</b>, <b>MEQ</b>, <b>MES</b>, <b>MJU</b>, <b>MKQ</b>, <b>MKW</b>, <b>MLG</b>, <b>MNA</b>, <b>MOF</b>, <b>MOH</b>, <b>MPC</b>, <b>MSI</b>, <b>MWK</b>, <b>MWS</b>, <b>MXB</b>, <b>NAF</b>, <b>NAH</b>, <b>NAM</b>, <b>NBX</b>, <b>NDA</b>, <b>NKD</b>, <b>NNX</b>, <b>NPO</b>, <b>NRE</b>, <b>NTI</b>, <b>NTX</b>, <b>OBD</b>, <b>OJU</b>, <b>OKL</b>, <b>OKQ</b>, <b>ONI</b>, <b>OTI</b>, <b>PCB</b>, <b>PDG</b>, <b>PDO</b>, <b>PGK</b>, <b>PGQ</b>, <b>PKN</b>, <b>PKU</b>, <b>PKY</b>, <b>PLM</b>, <b>PLW</b>, <b>PNK</b>, <b>PPJ</b>, <b>PPR</b>, <b>PSJ</b>, <b>PSU</b>, <b>PWL</b>, <b>PXA</b>, <b>RAQ</b>, <b>RDE</b>, <b>RGT</b>, <b>RJM</b>, <b>RKI</b>, <b>RSK</b>, <b>RTG</b>, <b>RTI</b>, <b>RTO</b>, <b>RTU</b>, <b>RUF</b>, <b>SAU</b>, <b>SBG</b>, <b>SEH</b>, <b>SEQ</b>, <b>SGQ</b>, <b>SIQ</b>, <b>SIW</b>, <b>SKJ</b>, <b>SMQ</b>, <b>SOC</b>, <b>SOQ</b>, <b>SQG</b>, <b>SQN</b>, <b>SQR</b>, <b>SRG</b>, <b>SUB</b>, <b>SUP</b>, <b>SWQ</b>, <b>SXK</b>, <b>TAX</b>, <b>TBM</b>, <b>TBX</b>, <b>TFY</b>, <b>TIM</b>, <b>TJB</b>, <b>TJG</b>, <b>TJQ</b>, <b>TJS</b>, <b>TKG</b>, <b>TLI</b>, <b>TMC</b>, <b>TMH</b>, <b>TMY</b>, <b>TNB</b>, <b>TNJ</b>, <b>TPK</b>, <b>TQQ</b>, <b>TRK</b>, <b>TRT</b>, <b>TSY</b>, <b>TTE</b>, <b>TTR</b>, <b>TXE</b>, <b>TXM</b>, <b>UGU</b>, <b>UOL</b>, <b>UPG</b>, <b>WBA</b>, <b>WDB</b>, <b>WET</b>, <b>WGP</b>, <b>WMX</b>, <b>WNI</b>, <b>WSR</b>, <b>YIA</b>, <b>ZEG</b>, <b>ZRI</b>, <b>ZRM</b>. Kode yang sudah ada akan
+          diperbarui.
+        </p>
+        <form method="post" action="/admin/airport" class="fg">
+          <input type="hidden" name="csrf" value="090c2d314618e0f3278c2a3dd0ab69eb" /><input
+            type="hidden"
+            name="view_year"
+            value="2026"
+          />
+          <div>
+            <label for="ac">Kode (3 huruf)</label
+            ><input id="ac" name="code" maxlength="3" required />
+          </div>
+          <div>
+            <label for="an">Nama</label
+            ><input id="an" name="name" required maxlength="120" />
+          </div>
+          <div>
+            <label for="al">Lintang</label
+            ><input id="al" name="lat" type="number" step="any" required />
+          </div>
+          <div>
+            <label for="ao">Bujur</label
+            ><input id="ao" name="lon" type="number" step="any" required />
+          </div>
+          <div><button class="btn">Simpan bandara</button></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Rute</h2>
+        <form method="post" action="/admin/route" class="fg">
+          <input type="hidden" name="csrf" value="090c2d314618e0f3278c2a3dd0ab69eb" /><input
+            type="hidden"
+            name="view_year"
+            value="2026"
+          />
+          <div>
+            <label for="ro">Asal</label
+            ><select id="ro" name="origin">
+              
+              <option value="AAP">AAP</option>
+              
+              <option value="AAS">AAS</option>
+              
+              <option value="ABU">ABU</option>
+              
+              <option value="AEG">AEG</option>
+              
+              <option value="AGD">AGD</option>
+              
+              <option value="AHI">AHI</option>
+              
+              <option value="AKQ">AKQ</option>
+              
+              <option value="AMQ">AMQ</option>
+              
+              <option value="APD">APD</option>
+              
+              <option value="ARD">ARD</option>
+              
+              <option value="AXO">AXO</option>
+              
+              <option value="AYW">AYW</option>
+              
+              <option value="BDJ">BDJ</option>
+              
+              <option value="BDO">BDO</option>
+              
+              <option value="BEJ">BEJ</option>
+              
+              <option value="BIK">BIK</option>
+              
+              <option value="BJK">BJK</option>
+              
+              <option value="BJW">BJW</option>
+              
+              <option value="BKS">BKS</option>
+              
+              <option value="BMU">BMU</option>
+              
+              <option value="BPN">BPN</option>
+              
+              <option value="BQR">BQR</option>
+              
+              <option value="BRG">BRG</option>
+              
+              <option value="BTH">BTH</option>
+              
+              <option value="BTJ">BTJ</option>
+              
+              <option value="BTW">BTW</option>
+              
+              <option value="BUI">BUI</option>
+              
+              <option value="BUU">BUU</option>
+              
+              <option value="BUW">BUW</option>
+              
+              <option value="BWX">BWX</option>
+              
+              <option value="BXB">BXB</option>
+              
+              <option value="BXD">BXD</option>
+              
+              <option value="BXM">BXM</option>
+              
+              <option value="BXT">BXT</option>
+              
+              <option value="BXW">BXW</option>
+              
+              <option value="CBN">CBN</option>
+              
+              <option value="CGK">CGK</option>
+              
+              <option value="CJN">CJN</option>
+              
+              <option value="CPF">CPF</option>
+              
+              <option value="CXP">CXP</option>
+              
+              <option value="DEX">DEX</option>
+              
+              <option value="DHX">DHX</option>
+              
+              <option value="DJB">DJB</option>
+              
+              <option value="DJJ">DJJ</option>
+              
+              <option value="DOB">DOB</option>
+              
+              <option value="DPS">DPS</option>
+              
+              <option value="DRH">DRH</option>
+              
+              <option value="DTB">DTB</option>
+              
+              <option value="DTD">DTD</option>
+              
+              <option value="DUM">DUM</option>
+              
+              <option value="ELR">ELR</option>
+              
+              <option value="ENE">ENE</option>
+              
+              <option value="ENG">ENG</option>
+              
+              <option value="EWE">EWE</option>
+              
+              <option value="EWI">EWI</option>
+              
+              <option value="FKQ">FKQ</option>
+              
+              <option value="FLZ">FLZ</option>
+              
+              <option value="FOO">FOO</option>
+              
+              <option value="FSH">FSH</option>
+              
+              <option value="GAV">GAV</option>
+              
+              <option value="GEB">GEB</option>
+              
+              <option value="GHS">GHS</option>
+              
+              <option value="GLX">GLX</option>
+              
+              <option value="GNS">GNS</option>
+              
+              <option value="GTO">GTO</option>
+              
+              <option value="GXM">GXM</option>
+              
+              <option value="GYO">GYO</option>
+              
+              <option value="HLM">HLM</option>
+              
+              <option value="HLP">HLP</option>
+              
+              <option value="HMS">HMS</option>
+              
+              <option value="IAX">IAX</option>
+              
+              <option value="ILA">ILA</option>
+              
+              <option value="INX">INX</option>
+              
+              <option value="IUL">IUL</option>
+              
+              <option value="JBB">JBB</option>
+              
+              <option value="JHN">JHN</option>
+              
+              <option value="JIO">JIO</option>
+              
+              <option value="JOG">JOG</option>
+              
+              <option value="KAZ">KAZ</option>
+              
+              <option value="KBF">KBF</option>
+              
+              <option value="KBU">KBU</option>
+              
+              <option value="KBX">KBX</option>
+              
+              <option value="KCD">KCD</option>
+              
+              <option value="KDI">KDI</option>
+              
+              <option value="KEI">KEI</option>
+              
+              <option value="KEQ">KEQ</option>
+              
+              <option value="KJT">KJT</option>
+              
+              <option value="KJX">KJX</option>
+              
+              <option value="KLP">KLP</option>
+              
+              <option value="KMM">KMM</option>
+              
+              <option value="KNG">KNG</option>
+              
+              <option value="KNO">KNO</option>
+              
+              <option value="KOD">KOD</option>
+              
+              <option value="KOE">KOE</option>
+              
+              <option value="KOX">KOX</option>
+              
+              <option value="KRC">KRC</option>
+              
+              <option value="KSR">KSR</option>
+              
+              <option value="KTG">KTG</option>
+              
+              <option value="KWB">KWB</option>
+              
+              <option value="KXB">KXB</option>
+              
+              <option value="LAH">LAH</option>
+              
+              <option value="LBJ">LBJ</option>
+              
+              <option value="LBW">LBW</option>
+              
+              <option value="LHI">LHI</option>
+              
+              <option value="LII">LII</option>
+              
+              <option value="LKA">LKA</option>
+              
+              <option value="LKI">LKI</option>
+              
+              <option value="LKM">LKM</option>
+              
+              <option value="LLJ">LLJ</option>
+              
+              <option value="LLN">LLN</option>
+              
+              <option value="LLO">LLO</option>
+              
+              <option value="LMU">LMU</option>
+              
+              <option value="LNU">LNU</option>
+              
+              <option value="LOP">LOP</option>
+              
+              <option value="LPU">LPU</option>
+              
+              <option value="LSR">LSR</option>
+              
+              <option value="LSW">LSW</option>
+              
+              <option value="LSX">LSX</option>
+              
+              <option value="LUV">LUV</option>
+              
+              <option value="LUW">LUW</option>
+              
+              <option value="LWE">LWE</option>
+              
+              <option value="LYK">LYK</option>
+              
+              <option value="MAL">MAL</option>
+              
+              <option value="MDC">MDC</option>
+              
+              <option value="MDP">MDP</option>
+              
+              <option value="MEQ">MEQ</option>
+              
+              <option value="MES">MES</option>
+              
+              <option value="MJU">MJU</option>
+              
+              <option value="MKQ">MKQ</option>
+              
+              <option value="MKW">MKW</option>
+              
+              <option value="MLG">MLG</option>
+              
+              <option value="MNA">MNA</option>
+              
+              <option value="MOF">MOF</option>
+              
+              <option value="MOH">MOH</option>
+              
+              <option value="MPC">MPC</option>
+              
+              <option value="MSI">MSI</option>
+              
+              <option value="MWK">MWK</option>
+              
+              <option value="MWS">MWS</option>
+              
+              <option value="MXB">MXB</option>
+              
+              <option value="NAF">NAF</option>
+              
+              <option value="NAH">NAH</option>
+              
+              <option value="NAM">NAM</option>
+              
+              <option value="NBX">NBX</option>
+              
+              <option value="NDA">NDA</option>
+              
+              <option value="NKD">NKD</option>
+              
+              <option value="NNX">NNX</option>
+              
+              <option value="NPO">NPO</option>
+              
+              <option value="NRE">NRE</option>
+              
+              <option value="NTI">NTI</option>
+              
+              <option value="NTX">NTX</option>
+              
+              <option value="OBD">OBD</option>
+              
+              <option value="OJU">OJU</option>
+              
+              <option value="OKL">OKL</option>
+              
+              <option value="OKQ">OKQ</option>
+              
+              <option value="ONI">ONI</option>
+              
+              <option value="OTI">OTI</option>
+              
+              <option value="PCB">PCB</option>
+              
+              <option value="PDG">PDG</option>
+              
+              <option value="PDO">PDO</option>
+              
+              <option value="PGK">PGK</option>
+              
+              <option value="PGQ">PGQ</option>
+              
+              <option value="PKN">PKN</option>
+              
+              <option value="PKU">PKU</option>
+              
+              <option value="PKY">PKY</option>
+              
+              <option value="PLM">PLM</option>
+              
+              <option value="PLW">PLW</option>
+              
+              <option value="PNK">PNK</option>
+              
+              <option value="PPJ">PPJ</option>
+              
+              <option value="PPR">PPR</option>
+              
+              <option value="PSJ">PSJ</option>
+              
+              <option value="PSU">PSU</option>
+              
+              <option value="PWL">PWL</option>
+              
+              <option value="PXA">PXA</option>
+              
+              <option value="RAQ">RAQ</option>
+              
+              <option value="RDE">RDE</option>
+              
+              <option value="RGT">RGT</option>
+              
+              <option value="RJM">RJM</option>
+              
+              <option value="RKI">RKI</option>
+              
+              <option value="RSK">RSK</option>
+              
+              <option value="RTG">RTG</option>
+              
+              <option value="RTI">RTI</option>
+              
+              <option value="RTO">RTO</option>
+              
+              <option value="RTU">RTU</option>
+              
+              <option value="RUF">RUF</option>
+              
+              <option value="SAU">SAU</option>
+              
+              <option value="SBG">SBG</option>
+              
+              <option value="SEH">SEH</option>
+              
+              <option value="SEQ">SEQ</option>
+              
+              <option value="SGQ">SGQ</option>
+              
+              <option value="SIQ">SIQ</option>
+              
+              <option value="SIW">SIW</option>
+              
+              <option value="SKJ">SKJ</option>
+              
+              <option value="SMQ">SMQ</option>
+              
+              <option value="SOC">SOC</option>
+              
+              <option value="SOQ">SOQ</option>
+              
+              <option value="SQG">SQG</option>
+              
+              <option value="SQN">SQN</option>
+              
+              <option value="SQR">SQR</option>
+              
+              <option value="SRG">SRG</option>
+              
+              <option value="SUB">SUB</option>
+              
+              <option value="SUP">SUP</option>
+              
+              <option value="SWQ">SWQ</option>
+              
+              <option value="SXK">SXK</option>
+              
+              <option value="TAX">TAX</option>
+              
+              <option value="TBM">TBM</option>
+              
+              <option value="TBX">TBX</option>
+              
+              <option value="TFY">TFY</option>
+              
+              <option value="TIM">TIM</option>
+              
+              <option value="TJB">TJB</option>
+              
+              <option value="TJG">TJG</option>
+              
+              <option value="TJQ">TJQ</option>
+              
+              <option value="TJS">TJS</option>
+              
+              <option value="TKG">TKG</option>
+              
+              <option value="TLI">TLI</option>
+              
+              <option value="TMC">TMC</option>
+              
+              <option value="TMH">TMH</option>
+              
+              <option value="TMY">TMY</option>
+              
+              <option value="TNB">TNB</option>
+              
+              <option value="TNJ">TNJ</option>
+              
+              <option value="TPK">TPK</option>
+              
+              <option value="TQQ">TQQ</option>
+              
+              <option value="TRK">TRK</option>
+              
+              <option value="TRT">TRT</option>
+              
+              <option value="TSY">TSY</option>
+              
+              <option value="TTE">TTE</option>
+              
+              <option value="TTR">TTR</option>
+              
+              <option value="TXE">TXE</option>
+              
+              <option value="TXM">TXM</option>
+              
+              <option value="UGU">UGU</option>
+              
+              <option value="UOL">UOL</option>
+              
+              <option value="UPG">UPG</option>
+              
+              <option value="WBA">WBA</option>
+              
+              <option value="WDB">WDB</option>
+              
+              <option value="WET">WET</option>
+              
+              <option value="WGP">WGP</option>
+              
+              <option value="WMX">WMX</option>
+              
+              <option value="WNI">WNI</option>
+              
+              <option value="WSR">WSR</option>
+              
+              <option value="YIA">YIA</option>
+              
+              <option value="ZEG">ZEG</option>
+              
+              <option value="ZRI">ZRI</option>
+              
+              <option value="ZRM">ZRM</option>
+              
+            </select>
+          </div>
+          <div>
+            <label for="rd">Tujuan</label
+            ><select id="rd" name="dest">
+              
+              <option value="AAP">AAP</option>
+              
+              <option value="AAS">AAS</option>
+              
+              <option value="ABU">ABU</option>
+              
+              <option value="AEG">AEG</option>
+              
+              <option value="AGD">AGD</option>
+              
+              <option value="AHI">AHI</option>
+              
+              <option value="AKQ">AKQ</option>
+              
+              <option value="AMQ">AMQ</option>
+              
+              <option value="APD">APD</option>
+              
+              <option value="ARD">ARD</option>
+              
+              <option value="AXO">AXO</option>
+              
+              <option value="AYW">AYW</option>
+              
+              <option value="BDJ">BDJ</option>
+              
+              <option value="BDO">BDO</option>
+              
+              <option value="BEJ">BEJ</option>
+              
+              <option value="BIK">BIK</option>
+              
+              <option value="BJK">BJK</option>
+              
+              <option value="BJW">BJW</option>
+              
+              <option value="BKS">BKS</option>
+              
+              <option value="BMU">BMU</option>
+              
+              <option value="BPN">BPN</option>
+              
+              <option value="BQR">BQR</option>
+              
+              <option value="BRG">BRG</option>
+              
+              <option value="BTH">BTH</option>
+              
+              <option value="BTJ">BTJ</option>
+              
+              <option value="BTW">BTW</option>
+              
+              <option value="BUI">BUI</option>
+              
+              <option value="BUU">BUU</option>
+              
+              <option value="BUW">BUW</option>
+              
+              <option value="BWX">BWX</option>
+              
+              <option value="BXB">BXB</option>
+              
+              <option value="BXD">BXD</option>
+              
+              <option value="BXM">BXM</option>
+              
+              <option value="BXT">BXT</option>
+              
+              <option value="BXW">BXW</option>
+              
+              <option value="CBN">CBN</option>
+              
+              <option value="CGK">CGK</option>
+              
+              <option value="CJN">CJN</option>
+              
+              <option value="CPF">CPF</option>
+              
+              <option value="CXP">CXP</option>
+              
+              <option value="DEX">DEX</option>
+              
+              <option value="DHX">DHX</option>
+              
+              <option value="DJB">DJB</option>
+              
+              <option value="DJJ">DJJ</option>
+              
+              <option value="DOB">DOB</option>
+              
+              <option value="DPS">DPS</option>
+              
+              <option value="DRH">DRH</option>
+              
+              <option value="DTB">DTB</option>
+              
+              <option value="DTD">DTD</option>
+              
+              <option value="DUM">DUM</option>
+              
+              <option value="ELR">ELR</option>
+              
+              <option value="ENE">ENE</option>
+              
+              <option value="ENG">ENG</option>
+              
+              <option value="EWE">EWE</option>
+              
+              <option value="EWI">EWI</option>
+              
+              <option value="FKQ">FKQ</option>
+              
+              <option value="FLZ">FLZ</option>
+              
+              <option value="FOO">FOO</option>
+              
+              <option value="FSH">FSH</option>
+              
+              <option value="GAV">GAV</option>
+              
+              <option value="GEB">GEB</option>
+              
+              <option value="GHS">GHS</option>
+              
+              <option value="GLX">GLX</option>
+              
+              <option value="GNS">GNS</option>
+              
+              <option value="GTO">GTO</option>
+              
+              <option value="GXM">GXM</option>
+              
+              <option value="GYO">GYO</option>
+              
+              <option value="HLM">HLM</option>
+              
+              <option value="HLP">HLP</option>
+              
+              <option value="HMS">HMS</option>
+              
+              <option value="IAX">IAX</option>
+              
+              <option value="ILA">ILA</option>
+              
+              <option value="INX">INX</option>
+              
+              <option value="IUL">IUL</option>
+              
+              <option value="JBB">JBB</option>
+              
+              <option value="JHN">JHN</option>
+              
+              <option value="JIO">JIO</option>
+              
+              <option value="JOG">JOG</option>
+              
+              <option value="KAZ">KAZ</option>
+              
+              <option value="KBF">KBF</option>
+              
+              <option value="KBU">KBU</option>
+              
+              <option value="KBX">KBX</option>
+              
+              <option value="KCD">KCD</option>
+              
+              <option value="KDI">KDI</option>
+              
+              <option value="KEI">KEI</option>
+              
+              <option value="KEQ">KEQ</option>
+              
+              <option value="KJT">KJT</option>
+              
+              <option value="KJX">KJX</option>
+              
+              <option value="KLP">KLP</option>
+              
+              <option value="KMM">KMM</option>
+              
+              <option value="KNG">KNG</option>
+              
+              <option value="KNO">KNO</option>
+              
+              <option value="KOD">KOD</option>
+              
+              <option value="KOE">KOE</option>
+              
+              <option value="KOX">KOX</option>
+              
+              <option value="KRC">KRC</option>
+              
+              <option value="KSR">KSR</option>
+              
+              <option value="KTG">KTG</option>
+              
+              <option value="KWB">KWB</option>
+              
+              <option value="KXB">KXB</option>
+              
+              <option value="LAH">LAH</option>
+              
+              <option value="LBJ">LBJ</option>
+              
+              <option value="LBW">LBW</option>
+              
+              <option value="LHI">LHI</option>
+              
+              <option value="LII">LII</option>
+              
+              <option value="LKA">LKA</option>
+              
+              <option value="LKI">LKI</option>
+              
+              <option value="LKM">LKM</option>
+              
+              <option value="LLJ">LLJ</option>
+              
+              <option value="LLN">LLN</option>
+              
+              <option value="LLO">LLO</option>
+              
+              <option value="LMU">LMU</option>
+              
+              <option value="LNU">LNU</option>
+              
+              <option value="LOP">LOP</option>
+              
+              <option value="LPU">LPU</option>
+              
+              <option value="LSR">LSR</option>
+              
+              <option value="LSW">LSW</option>
+              
+              <option value="LSX">LSX</option>
+              
+              <option value="LUV">LUV</option>
+              
+              <option value="LUW">LUW</option>
+              
+              <option value="LWE">LWE</option>
+              
+              <option value="LYK">LYK</option>
+              
+              <option value="MAL">MAL</option>
+              
+              <option value="MDC">MDC</option>
+              
+              <option value="MDP">MDP</option>
+              
+              <option value="MEQ">MEQ</option>
+              
+              <option value="MES">MES</option>
+              
+              <option value="MJU">MJU</option>
+              
+              <option value="MKQ">MKQ</option>
+              
+              <option value="MKW">MKW</option>
+              
+              <option value="MLG">MLG</option>
+              
+              <option value="MNA">MNA</option>
+              
+              <option value="MOF">MOF</option>
+              
+              <option value="MOH">MOH</option>
+              
+              <option value="MPC">MPC</option>
+              
+              <option value="MSI">MSI</option>
+              
+              <option value="MWK">MWK</option>
+              
+              <option value="MWS">MWS</option>
+              
+              <option value="MXB">MXB</option>
+              
+              <option value="NAF">NAF</option>
+              
+              <option value="NAH">NAH</option>
+              
+              <option value="NAM">NAM</option>
+              
+              <option value="NBX">NBX</option>
+              
+              <option value="NDA">NDA</option>
+              
+              <option value="NKD">NKD</option>
+              
+              <option value="NNX">NNX</option>
+              
+              <option value="NPO">NPO</option>
+              
+              <option value="NRE">NRE</option>
+              
+              <option value="NTI">NTI</option>
+              
+              <option value="NTX">NTX</option>
+              
+              <option value="OBD">OBD</option>
+              
+              <option value="OJU">OJU</option>
+              
+              <option value="OKL">OKL</option>
+              
+              <option value="OKQ">OKQ</option>
+              
+              <option value="ONI">ONI</option>
+              
+              <option value="OTI">OTI</option>
+              
+              <option value="PCB">PCB</option>
+              
+              <option value="PDG">PDG</option>
+              
+              <option value="PDO">PDO</option>
+              
+              <option value="PGK">PGK</option>
+              
+              <option value="PGQ">PGQ</option>
+              
+              <option value="PKN">PKN</option>
+              
+              <option value="PKU">PKU</option>
+              
+              <option value="PKY">PKY</option>
+              
+              <option value="PLM">PLM</option>
+              
+              <option value="PLW">PLW</option>
+              
+              <option value="PNK">PNK</option>
+              
+              <option value="PPJ">PPJ</option>
+              
+              <option value="PPR">PPR</option>
+              
+              <option value="PSJ">PSJ</option>
+              
+              <option value="PSU">PSU</option>
+              
+              <option value="PWL">PWL</option>
+              
+              <option value="PXA">PXA</option>
+              
+              <option value="RAQ">RAQ</option>
+              
+              <option value="RDE">RDE</option>
+              
+              <option value="RGT">RGT</option>
+              
+              <option value="RJM">RJM</option>
+              
+              <option value="RKI">RKI</option>
+              
+              <option value="RSK">RSK</option>
+              
+              <option value="RTG">RTG</option>
+              
+              <option value="RTI">RTI</option>
+              
+              <option value="RTO">RTO</option>
+              
+              <option value="RTU">RTU</option>
+              
+              <option value="RUF">RUF</option>
+              
+              <option value="SAU">SAU</option>
+              
+              <option value="SBG">SBG</option>
+              
+              <option value="SEH">SEH</option>
+              
+              <option value="SEQ">SEQ</option>
+              
+              <option value="SGQ">SGQ</option>
+              
+              <option value="SIQ">SIQ</option>
+              
+              <option value="SIW">SIW</option>
+              
+              <option value="SKJ">SKJ</option>
+              
+              <option value="SMQ">SMQ</option>
+              
+              <option value="SOC">SOC</option>
+              
+              <option value="SOQ">SOQ</option>
+              
+              <option value="SQG">SQG</option>
+              
+              <option value="SQN">SQN</option>
+              
+              <option value="SQR">SQR</option>
+              
+              <option value="SRG">SRG</option>
+              
+              <option value="SUB">SUB</option>
+              
+              <option value="SUP">SUP</option>
+              
+              <option value="SWQ">SWQ</option>
+              
+              <option value="SXK">SXK</option>
+              
+              <option value="TAX">TAX</option>
+              
+              <option value="TBM">TBM</option>
+              
+              <option value="TBX">TBX</option>
+              
+              <option value="TFY">TFY</option>
+              
+              <option value="TIM">TIM</option>
+              
+              <option value="TJB">TJB</option>
+              
+              <option value="TJG">TJG</option>
+              
+              <option value="TJQ">TJQ</option>
+              
+              <option value="TJS">TJS</option>
+              
+              <option value="TKG">TKG</option>
+              
+              <option value="TLI">TLI</option>
+              
+              <option value="TMC">TMC</option>
+              
+              <option value="TMH">TMH</option>
+              
+              <option value="TMY">TMY</option>
+              
+              <option value="TNB">TNB</option>
+              
+              <option value="TNJ">TNJ</option>
+              
+              <option value="TPK">TPK</option>
+              
+              <option value="TQQ">TQQ</option>
+              
+              <option value="TRK">TRK</option>
+              
+              <option value="TRT">TRT</option>
+              
+              <option value="TSY">TSY</option>
+              
+              <option value="TTE">TTE</option>
+              
+              <option value="TTR">TTR</option>
+              
+              <option value="TXE">TXE</option>
+              
+              <option value="TXM">TXM</option>
+              
+              <option value="UGU">UGU</option>
+              
+              <option value="UOL">UOL</option>
+              
+              <option value="UPG">UPG</option>
+              
+              <option value="WBA">WBA</option>
+              
+              <option value="WDB">WDB</option>
+              
+              <option value="WET">WET</option>
+              
+              <option value="WGP">WGP</option>
+              
+              <option value="WMX">WMX</option>
+              
+              <option value="WNI">WNI</option>
+              
+              <option value="WSR">WSR</option>
+              
+              <option value="YIA">YIA</option>
+              
+              <option value="ZEG">ZEG</option>
+              
+              <option value="ZRI">ZRI</option>
+              
+              <option value="ZRM">ZRM</option>
+              
+            </select>
+          </div>
+          <div>
+            <label for="rn">Hemat jarak (Nm)</label
+            ><input
+              id="rn"
+              name="saving_nm"
+              type="number"
+              step="any"
+              required
+            />
+          </div>
+          <div>
+            <label for="rm">Hemat waktu (menit)</label
+            ><input
+              id="rm"
+              name="saving_min"
+              type="number"
+              step="any"
+              required
+            />
+          </div>
+          <div><button class="btn">Simpan rute</button></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Penerbangan per hari</h2>
+        <form method="post" action="/admin/flights" class="fg">
+          <input type="hidden" name="csrf" value="090c2d314618e0f3278c2a3dd0ab69eb" /><input
+            type="hidden"
+            name="view_year"
+            value="2026"
+          />
+          <div>
+            <label for="fr">Rute</label
+            ><select id="fr" name="route_id">
+              
+              <option value="15">BDO-DPS</option>
+              
+              <option value="14">BDO-SUB</option>
+              
+              <option value="16">BDO-UPG</option>
+              
+              <option value="1">CGK-DPS</option>
+              
+              <option value="18">CGK-MLG</option>
+              
+              <option value="4">CGK-SRG</option>
+              
+              <option value="2">CGK-SUB</option>
+              
+              <option value="3">CGK-UPG</option>
+              
+              <option value="17">CGK-YIA</option>
+              
+              <option value="6">DPS-UPG</option>
+              
+              <option value="9">HLM-DPS</option>
+              
+              <option value="8">HLM-SRG</option>
+              
+              <option value="10">HLM-SUB</option>
+              
+              <option value="11">HLM-UPG</option>
+              
+              <option value="13">SRG-DPS</option>
+              
+              <option value="12">SRG-UPG</option>
+              
+              <option value="5">SUB-DPS</option>
+              
+              <option value="7">SUB-UPG</option>
+              
+            </select>
+          </div>
+          <div>
+            <label for="fy">Tahun</label
+            ><input
+              id="fy"
+              name="year"
+              type="number"
+              value="2026"
+              min="2020"
+              max="2100"
+              required
+            />
+          </div>
+          <div>
+            <label for="fq">Triwulan</label
+            ><select id="fq" name="quarter">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+            </select>
+          </div>
+          <div>
+            <label for="ff">Penerbangan/hari</label
+            ><input
+              id="ff"
+              name="flights"
+              type="number"
+              step="any"
+              min="0"
+              required
+            />
+          </div>
+          <div><button class="btn">Simpan</button></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Data saat ini</h2>
+        <form method="get" action="admin.html" class="fg one">
+          <div>
+            <label for="vy">Lihat tahun</label
+            ><input
+              id="vy"
+              name="year"
+              type="number"
+              value="2026"
+              min="2020"
+              max="2100"
+            />
+          </div>
+          <div><button class="btn">Tampilkan</button></div>
+        </form>
+        <div class="tb">
+          <table>
+            <thead>
+              <tr>
+                <th>Rute</th>
+                <th>Hemat Nm</th>
+                <th>Hemat menit</th>
+                <th>TW I</th>
+                <th>TW II</th>
+                <th>TW III</th>
+                <th>TW IV</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr>
+                <td>BDO-DPS</td>
+                <td>14.0</td>
+                <td>2.0</td>
+                <td>1.0</td>
+                <td>16.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/15/delete"
+                    onsubmit="return confirm('Hapus rute BDO-DPS beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>BDO-SUB</td>
+                <td>12.0</td>
+                <td>1.7</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/14/delete"
+                    onsubmit="return confirm('Hapus rute BDO-SUB beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>BDO-UPG</td>
+                <td>18.0</td>
+                <td>2.6</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/16/delete"
+                    onsubmit="return confirm('Hapus rute BDO-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-DPS</td>
+                <td>12.1</td>
+                <td>1.7</td>
+                <td>50.0</td>
+                <td>50.0</td>
+                <td>50.0</td>
+                <td>50.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/1/delete"
+                    onsubmit="return confirm('Hapus rute CGK-DPS beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-MLG</td>
+                <td>5.0</td>
+                <td>0.7</td>
+                <td>0</td>
+                <td>4.0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/18/delete"
+                    onsubmit="return confirm('Hapus rute CGK-MLG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-SRG</td>
+                <td>6.0</td>
+                <td>0.9</td>
+                <td>13.0</td>
+                <td>13.0</td>
+                <td>13.0</td>
+                <td>13.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/4/delete"
+                    onsubmit="return confirm('Hapus rute CGK-SRG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-SUB</td>
+                <td>14.3</td>
+                <td>2.0</td>
+                <td>44.0</td>
+                <td>44.0</td>
+                <td>44.0</td>
+                <td>44.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/2/delete"
+                    onsubmit="return confirm('Hapus rute CGK-SUB beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-UPG</td>
+                <td>22.6</td>
+                <td>3.2</td>
+                <td>64.0</td>
+                <td>64.0</td>
+                <td>64.0</td>
+                <td>64.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/3/delete"
+                    onsubmit="return confirm('Hapus rute CGK-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>CGK-YIA</td>
+                <td>8.0</td>
+                <td>1.1</td>
+                <td>0</td>
+                <td>16.0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/17/delete"
+                    onsubmit="return confirm('Hapus rute CGK-YIA beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>DPS-UPG</td>
+                <td>11.0</td>
+                <td>1.6</td>
+                <td>7.0</td>
+                <td>7.0</td>
+                <td>7.0</td>
+                <td>7.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/6/delete"
+                    onsubmit="return confirm('Hapus rute DPS-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>HLM-DPS</td>
+                <td>14.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/9/delete"
+                    onsubmit="return confirm('Hapus rute HLM-DPS beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>HLM-SRG</td>
+                <td>6.0</td>
+                <td>0.9</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/8/delete"
+                    onsubmit="return confirm('Hapus rute HLM-SRG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>HLM-SUB</td>
+                <td>14.3</td>
+                <td>2.0</td>
+                <td>14.0</td>
+                <td>14.0</td>
+                <td>14.0</td>
+                <td>14.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/10/delete"
+                    onsubmit="return confirm('Hapus rute HLM-SUB beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>HLM-UPG</td>
+                <td>22.6</td>
+                <td>3.2</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>1.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/11/delete"
+                    onsubmit="return confirm('Hapus rute HLM-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>SRG-DPS</td>
+                <td>10.0</td>
+                <td>1.4</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>2.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/13/delete"
+                    onsubmit="return confirm('Hapus rute SRG-DPS beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>SRG-UPG</td>
+                <td>12.0</td>
+                <td>1.7</td>
+                <td>4.0</td>
+                <td>4.0</td>
+                <td>4.0</td>
+                <td>4.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/12/delete"
+                    onsubmit="return confirm('Hapus rute SRG-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>SUB-DPS</td>
+                <td>10.0</td>
+                <td>1.4</td>
+                <td>17.0</td>
+                <td>17.0</td>
+                <td>17.0</td>
+                <td>17.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/5/delete"
+                    onsubmit="return confirm('Hapus rute SUB-DPS beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>SUB-UPG</td>
+                <td>13.0</td>
+                <td>1.9</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>30.0</td>
+                <td>
+                  <form
+                    method="post"
+                    action="/admin/route/7/delete"
+                    onsubmit="return confirm('Hapus rute SUB-UPG beserta data penerbangannya?')"
+                  >
+                    <input
+                      type="hidden"
+                      name="csrf"
+                      value="090c2d314618e0f3278c2a3dd0ab69eb"
+                    /><input
+                      type="hidden"
+                      name="view_year"
+                      value="2026"
+                    /><button class="sm dng">Hapus</button>
+                  </form>
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0b3a5c;color:#fff;
+font:14px/1.5 system-ui,sans-serif;padding:10px 16px;text-align:center">
+<strong>Demo statis</strong> — dibuat dari dashboard asli. Login, pendaftaran akun, dan penyimpanan data
+tidak aktif karena ini hosting statis GitHub Pages. Data yang tampil adalah data nyata dari database lokal.
+</div>
+</body>
+</html>
