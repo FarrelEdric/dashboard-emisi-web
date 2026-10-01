@@ -1,0 +1,18 @@
+# Jangan pernah kirim berkas rahasia / lokal ke Vercel
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite3
+users.db
+venv
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+_site
+_preview_*.html
+_ghpages-build
+airports.csv
+.git
+node_modules
