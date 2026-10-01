@@ -440,12 +440,12 @@ $("dep").onchange = () => {
     empty($("dep").value, "—");
     return;
   }
-  // kalau tujuan sebelumnya tidak punya rute dengan asal yang baru, pilih tujuan
-  // pertama yang tersedia — jadi tombol "Tampilkan rute" selalu bisa dipakai
-  if (!$("dst").value && l.length) {
-    $("dst").value = l[0];
-    showSelectedRoute();
-  }
+  // tujuan sebelumnya dipakai lagi kalau masih punya rute dengan asal yang baru;
+  // kalau tidak, pakai tujuan pertama yang tersedia
+  if (!$("dst").value) $("dst").value = l[0];
+  // gambar ulang rute supaya label, peta, dan grafik tidak tertinggal dari
+  // pilihan sebelumnya
+  showSelectedRoute();
 };
 $("dst").onchange = () => {
   resultVisible = false;
