@@ -405,8 +405,15 @@ function load() {
 const fillDst = () => {
   const cur = $("dst").value,
     l = pairs($("dep").value);
-  $("dst").innerHTML = l.map(opt).join("");
+  // kalau bandara asal belum punya rute sama sekali (mis. baru ditambahkan di
+  // halaman Admin), dropdown tujuan jangan dibiarkan kosong tanpa keterangan
+  $("dst").innerHTML = l.length
+    ? l.map(opt).join("")
+    : '<option value="">(belum ada rute)</option>';
+  // pilihan tujuan sebelumnya dipertahankan selama masih punya rute dengan
+  // bandara asal yang baru — supaya tidak ikut terhapus saat asal diganti
   if (l.includes(cur)) $("dst").value = cur;
+  return l;
 };
 function pick(a, b) {
   $("dep").value = a;
@@ -426,7 +433,13 @@ function showSelectedRoute() {
 // ===== EVENT =====
 $("dep").onchange = () => {
   resultVisible = false;
-  fillDst();
+  const l = fillDst();
+  // kalau tujuan sebelumnya tidak punya rute dengan asal yang baru, pilih tujuan
+  // pertama yang tersedia — jadi tombol "Tampilkan rute" selalu bisa dipakai
+  if (!$("dst").value && l.length) {
+    $("dst").value = l[0];
+    showSelectedRoute();
+  }
 };
 $("dst").onchange = () => {
   resultVisible = false;
