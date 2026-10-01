@@ -86,7 +86,24 @@ def ensure_admin():
 
     row = db.session.get(User, user)
     if row:
-        print(f"[login] akun admin sudah ada: {user}")
+        # ADMIN_PASSWORD dijadikan acuan: kalau password di env diganti, akun yang
+        # sudah ada ikut disesuaikan. Tanpa ini, password baru diabaikan diam-diam
+        # dan yang berlaku tetap password lama.
+        berubah = False
+        if not check_password_hash(row.password_hash, pw):
+            row.password_hash = generate_password_hash(pw)
+            berubah = True
+        if row.role != "admin":
+            row.role = "admin"
+            berubah = True
+        if not row.approved:
+            row.approved = 1
+            berubah = True
+        if berubah:
+            db.session.commit()
+            print(f"[login] akun admin diperbarui sesuai ADMIN_PASSWORD: {user}")
+        else:
+            print(f"[login] akun admin sudah ada: {user}")
         return
 
     db.session.add(
