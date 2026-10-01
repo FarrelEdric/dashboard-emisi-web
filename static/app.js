@@ -81,35 +81,64 @@ const co2 = (nm, fl, d) => nm * 1.852 * fl * d * P("fb") * P("ef");
 // Biaya (USD) = menit x CI x penerbangan/hari x hari
 const usd = (tm, fl, d) => tm * P("ci") * fl * d;
 
-// ===== PETA (Leaflet + tile OpenStreetMap/CARTO) =====
-let map, base, layer, timer, lastKey;
-const TILE = {
-  light: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  dark: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-};
-function setBase() {
-  if (base) map.removeLayer(base);
-  base = L.tileLayer(TILE.light, {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
-    subdomains: "abc",
-  }).addTo(map);
-}
+// ===== PETA =====
+// Latar peta memakai ubin vektor OpenFreeMap (https://openfreemap.org) — gratis,
+// tanpa kunci API, tanpa batas permintaan, boleh komersial. Datanya dari
+// OpenStreetMap. Ubinnya dirender MapLibre dan dipasang sebagai lapisan di dalam
+// Leaflet, jadi rute, titik bandara, dan label bandara tetap memakai kode
+// Leaflet yang sudah ada.
+//
+// Gaya petanya gaya bawaan OpenFreeMap "bright", disalin ke
+// static/style/map-natural.json supaya tampilannya terkunci pada berkas di repo
+// ini: laut biru, daratan krem, jalan oranye, nama tempat hitam berhalo putih —
+// seperti peta pada umumnya. Perbarui salinannya lewat tools/build_map_style.py.
+const MAP_STYLE = "/static/style/map-natural.json";
+// titik tengah Indonesia
+const MAP_CENTER = [-2.5, 118];
+let map, layer, timer, lastKey;
+let dots = true; // titik bandara ditampilkan atau tidak (tombol "Titik bandara")
+let current = null; // rute yang sedang digambar, untuk digambar ulang tanpa hitung
+const OPENFREEMAP_CREDIT =
+  '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · ' +
+  'data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const MAP_BOUNDS = [
+  [-15, 90],
+  [15, 145],
+];
 function initMap() {
-  map = L.map("map", { renderer: L.canvas({ tolerance: 8 }) }).setView(
-    [-2.5, 118],
-    5,
-  );
-  map.setMaxBounds([
-    [-15, 90],
-    [15, 145],
-  ]);
-  map.options.minZoom = 4;
-  map.options.maxZoom = 10;
+  map = L.map("map", {
+    renderer: L.canvas({ tolerance: 8 }),
+    zoomSnap: 0.5, // kelipatan zoom setengah, jadi peta bisa pas mengikuti rute
+    worldCopyJump: false,
+  }).setView(MAP_CENTER, 5.5);
+  map.setMaxBounds(MAP_BOUNDS);
+  // z3 = seluruh Asia Tenggara (konteks), z12 = satu kota (jalan & blok bangunan)
+  map.options.minZoom = 3;
+  map.options.maxZoom = 12;
+  // latar peta dulu, lapisan rute di atasnya
+  try {
+    L.maplibreGL({ style: MAP_STYLE, attribution: OPENFREEMAP_CREDIT }).addTo(map);
+  } catch (e) {
+    console.warn("[map] latar peta gagal dimuat", e);
+  }
   layer = L.layerGroup().addTo(map);
-  setBase();
 }
+
+// Ukuran & posisi label bandara. Hanya bandara yang sedang dipilih yang diberi
+// label tetap — kalau ke-242 nama bandara ditulis semua, petanya penuh tulisan
+// dan rutenya tersembunyi. Angka dx/dy/anchor menggeser label dari titiknya
+// supaya tidak menutupi lambang bandara.
+const LABEL_OFFSET = { dx: 0, dy: -20, anchor: "bottom middle" };
+function labelSpot(k, isRouteAirport) {
+  const dx = +AP[k][3] || 0,
+    dy = +AP[k][4] || 0,
+    a = AP[k][5] || "";
+  if (dx || dy || a) return { dx, dy, anchor: a || "bottom middle" };
+  // label bandara terpilih: selalu sedikit ke atas supaya garis rutenya bebas
+  return isRouteAirport ? LABEL_OFFSET : { dx: 0, dy: -13, anchor: "bottom middle" };
+}
+
+
 const ll = (k) => [AP[k][1], AP[k][2]];
 // garis lengkung mengikuti permukaan bumi (great circle)
 function arc(p, q, n = 60) {
@@ -152,22 +181,50 @@ const planeIcon = (h) =>
     html: `<svg viewBox="0 0 24 24" width="32" height="32" style="transform:rotate(${h}deg)"><path fill="#1060a8" stroke="#ffffff" stroke-width="1.2" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
   });
 
+// titik bandara (bandara asal & tujuan selalu ditandai, ukurannya lebih besar).
+// Dipisah dari drawMap supaya tombol "Titik bandara" cukup menggambar bagian ini
+// tanpa menghitung ulang emisi.
+function drawAirports(a, b) {
+  if (!dots) return;
+  Object.keys(AP).forEach((k) => {
+    const h = k == a || k == b;
+    const m = L.circleMarker(ll(k), {
+      radius: h ? 6 : 3.5,
+      color: h ? "#ffffff" : "#1060a8",
+      weight: h ? 2 : 1.2,
+      fillColor: h ? "#e02828" : "#ffffff",
+      fillOpacity: 1,
+    }).addTo(layer);
+    // h hanya diberi label tetap supaya rute terpilih tidak tenggelam di antara
+    // 242 nama bandara; bandara lain menampilkan namanya saat diarahkan kursor
+    if (h) {
+      const s = labelSpot(k, true);
+      m.bindTooltip(k, {
+        permanent: true,
+        direction: s.anchor.split(" ")[0],
+        offset: [s.dx, s.dy],
+        className: "ap-tip",
+      });
+    } else
+      m.bindTooltip(k + " - " + AP[k][0], {
+        direction: "top",
+        className: "ap-tip",
+      });
+  });
+}
+
 function drawMap(sel, a, b, txt) {
+  current = { sel, a, b, txt }; // untuk digambar ulang saat tombol titik diubah
   layer.clearLayers();
   clearInterval(timer);
-  // semua rute: garis tipis, tebal menurut jumlah penerbangan
-  R.filter((r) => r !== sel).forEach((r) =>
-    L.polyline(arc(ll(r[0]), ll(r[1])), {
-      color: "#94a3b8",
-      weight: 1.5 + r[4][0] / 25,
-      opacity: 0.6,
-    })
-      .on("click", () => pick(r[0], r[1]))
-      .addTo(layer),
-  );
-  // rute terpilih: garis biru korporat + pesawat bergerak
+  // Hanya rute terpilih yang digambar. Garis abu-abu untuk seluruh rute lain
+  // dihapus: dengan 242 bandara garisnya memenuhi peta dan menutupi rutenya.
+  // Rute dipilih lewat dropdown Bandara asal / Tujuan.
   const pts = arc(ll(a), ll(b));
-  L.polyline(pts, { color: "#1060a8", weight: 4 })
+  // garis putih tipis di bawah garis biru: di atas peta yang penuh jalan dan
+  // nama tempat, garis biru sendirian tenggelam dan rutenya susah diikuti
+  L.polyline(pts, { color: "#ffffff", weight: 7, opacity: 0.9 }).addTo(layer);
+  L.polyline(pts, { color: "#1060a8", weight: 3.5 })
     .on("click", () => pick(a, b))
     .bindTooltip(txt, {
       permanent: true,
@@ -175,28 +232,7 @@ function drawMap(sel, a, b, txt) {
       className: "rt-tip",
     })
     .addTo(layer);
-  Object.keys(AP).forEach((k) => {
-    const h = k == a || k == b;
-    const m = L.circleMarker(ll(k), {
-      radius: h ? 7 : 5,
-      color: "#ffffff",
-      weight: 1.5,
-      fillColor: h ? "#e02828" : "#475569",
-      fillOpacity: 1,
-    }).addTo(layer);
-    if (h)
-      m.bindTooltip(k, {
-        permanent: true,
-        direction: "top",
-        offset: [0, -6],
-        className: "ap-tip",
-      });
-    else
-      m.bindTooltip(k + " - " + AP[k][0], {
-        direction: "top",
-        className: "ap-tip",
-      });
-  });
+  drawAirports(a, b);
   const plane = L.marker(pts[0], {
     icon: planeIcon(bearing(pts[0], pts[pts.length - 1])),
     interactive: false,
@@ -207,13 +243,15 @@ function drawMap(sel, a, b, txt) {
     i = (i + 1) % pts.length;
     plane.setLatLng(pts[i]);
   }, 100);
-  const key = a + "-" + b; // zoom ke rute hanya saat rute berganti
+  // zoom ke rute hanya saat rute berganti. Padding dan batas zoom dipilih
+  // supaya kota di sekitar rute ikut terlihat, bukan hanya garisnya saja
+  const key = a + "-" + b;
   if (key !== lastKey) {
     lastKey = key;
     map.flyToBounds(L.latLngBounds(pts), {
-      padding: [70, 70],
+      padding: [56, 56],
       duration: 0.8,
-      maxZoom: 8,
+      maxZoom: 9,
     });
   }
 }
@@ -288,11 +326,30 @@ function summary() {
 }
 
 // ===== UPDATE TAMPILAN =====
+// keadaan kosong: bandara terpilih belum punya data rute (umum setelah bandara
+// baru ditambahkan — rutenya belum diisi di halaman Admin)
+function empty(a, b) {
+  const pair = b && b !== "—" ? `${a} - ${b}` : a;
+  $("rt").textContent = `${pair}, ${label()}`;
+  $("dy").value = "";
+  $("cs").textContent =
+    `Belum ada data rute untuk ${pair}. Tambahkan rutenya di halaman Admin.`;
+  bars(new Array(MO.length).fill(0), []); // sumbu bulan tetap tampil
+  summary();
+  $("out").innerHTML = "";
+  $("out").classList.add("hidden");
+}
+
 function update() {
   const a = $("dep").value,
     b = $("dst").value,
     sel = find(a, b),
     s = span();
+
+  if (!sel) {
+    empty(a, b || "—");
+    return;
+  }
 
   $("dy").value = s.d;
   $("rt").textContent = `${a} - ${b}, ${label()}`;
@@ -333,8 +390,13 @@ function update() {
 
 // isi kalkulator dari data rute yang dipilih, lalu hitung
 function load() {
-  const r = find($("dep").value, $("dst").value),
-    s = span();
+  const r = find($("dep").value, $("dst").value);
+  if (!r) {
+    // bandara ini belum punya rute: jangan menyentuh isian, cukup tampilkan pesan
+    empty($("dep").value, $("dst").value || "—");
+    return;
+  }
+  const s = span();
   $("sd").value = r[2];
   $("tm").value = r[3];
   $("fl").value = r[4][Math.floor(s.ms[0] / 3)];
@@ -406,12 +468,19 @@ $("toggle-assumptions").onclick = () => {
   const hidden = panel.classList.toggle("hidden");
   btn.textContent = hidden ? "Tampilkan asumsi" : "Sembunyikan asumsi";
 };
+// tampilkan/sembunyikan titik bandara: gambar ulang peta dengan rute yang sama,
+// tanpa menghitung ulang emisi
+$("ap-toggle").onchange = (e) => {
+  dots = e.target.checked;
+  if (current) drawMap(current.sel, current.a, current.b, current.txt);
+};
 // ukuran kotak grafik berubah saat jendela diubah (atau saat scrollbar/font
 // selesai dimuat): gambar ulang agar gambar tidak berubah skala di dalam kotak
 // yang lebih lebar
 let rsz;
 const redraw = () => lastBars && bars(lastBars.v, lastBars.hi);
-if (typeof ResizeObserver !== "undefined") new ResizeObserver(redraw).observe($("chart"));
+if (typeof ResizeObserver !== "undefined")
+  new ResizeObserver(redraw).observe($("chart"));
 window.addEventListener("resize", () => {
   clearTimeout(rsz);
   rsz = setTimeout(redraw, 120);
@@ -449,6 +518,13 @@ getData()
     $("bl").innerHTML =
       '<option value="-1">Semua</option>' +
       MO.map((m, i) => `<option value="${i}">${m}</option>`).join("");
-    pick("CGK", "DPS");
+    // mulai dari rute pertama yang ada datanya; kalau belum ada rute sama sekali,
+    // tampilkan keadaan kosong, bukan galat
+    const first = R[0];
+    if (first) pick(first[0], first[1]);
+    else {
+      fillDst();
+      empty($("dep").value, "—");
+    }
   })
   .catch(() => {});

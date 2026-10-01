@@ -3,7 +3,7 @@
     {
       "src": "app.py",
       "use": "@vercel/python",
-      "config": { "includeFiles": ["templates/**", "static/**", "data.json"] }
+      "config": { "includeFiles": ["templates/**", "static/**", "data.json", "data/**"] }
     }
   ],
   "routes": [

@@ -18,8 +18,13 @@ ROOT = Path(__file__).resolve().parent
 
 # Optionally preview an alternative stylesheet:
 #   python _make_preview.py scratch/style-broken.css broken
+# Pass "live" as the first argument to embed the app's real /api/data response
+# (every airport in the database) instead of the fixture below.
 CSS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("static/style.css")
 SUFFIX = f"_{sys.argv[2]}" if len(sys.argv) > 2 else ""
+LIVE = CSS.as_posix() == "live"
+if LIVE:
+    CSS, SUFFIX = Path("static/style.css"), "_live"
 
 # Fixture served in place of /api/data so the dashboard JS runs for real.
 FIXTURE = {
@@ -47,13 +52,6 @@ FIXTURE = {
     "years": [2025, 2026],
 }
 
-STUB = (
-    "<script>\nwindow.fetch = function (url) {\n  var d = "
-    + json.dumps(FIXTURE)
-    + ";\n  return Promise.resolve({status: 200, json: function () "
-    "{\n    return Promise.resolve(d);\n  }});\n};\n</script>\n"
-)
-
 
 def preview(name: str, path: str) -> None:
     client = app.test_client()
@@ -69,14 +67,36 @@ def preview(name: str, path: str) -> None:
 
     # Flask already rendered url_for -> "/static/style.css"; repoint at the CSS under test
     html = re.sub(r'href="/static/style\.css[^"]*"', f'href="{CSS.as_posix()}"', html)
-    # keep app.js, but feed it fixture data instead of the live API
+    # keep app.js, but feed it data instead of the live API. In LIVE mode that data
+    # is the app's real /api/data payload (all airports in the database), otherwise
+    # the small fixture above. A plain static server has no session, so a real fetch
+    # would 401 and app.js would bounce to /login.
+    data = FIXTURE
+    if LIVE:
+        api = client.get("/api/data")
+        if api.status_code == 200:
+            data = api.get_json()
+        else:
+            print(f"  warn: /api/data -> HTTP {api.status_code}, memakai fixture")
+    stub = (
+        "<script>\nvar __api = "
+        + json.dumps(data)
+        + ";\nwindow.fetch = function (url) {\n"
+        # panggilan lain (mis. garis pantai di /static/data/) dibiarkan sungguhan,
+        # jadi berkas lokalnya tetap dimuat
+        '  if (String(url).indexOf("/api/data") < 0) return window.__realFetch(url);\n'
+        "  return Promise.resolve({status: 200, json: function () "
+        "{\n    return Promise.resolve(__api);\n  }});\n};\n</script>\n"
+    )
+    # __realFetch harus disimpan sebelum fetch ditimpa
     html = html.replace(
         '<script src="/static/app.js"></script>',
-        STUB + '<script src="/static/app.js"></script>',
+        "<script>window.__realFetch = window.fetch.bind(window);</script>\n" + stub
+        + '<script src="/static/app.js"></script>',
     )
     out = ROOT / f"_preview_{name}{SUFFIX}.html"
     out.write_text(html, encoding="utf-8")
-    print(f"wrote {out.name} (css={CSS.as_posix()}, {len(html)} bytes)")
+    print(f"wrote {out.name} (css={CSS.as_posix()}, airports={len(data['airports'])}, {len(html)} bytes)")
 
 
 preview("dashboard", "/dashboard")

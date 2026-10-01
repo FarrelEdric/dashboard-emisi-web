@@ -4,4 +4,9 @@ dashboard.db
 __pycache__/
 venv/
 .venv/
+.pytest_cache/
 instance/
+
+# sumber mentah (86 ribu bandara sedunia, ~13 MB) — tidak perlu ikut ter-deploy.
+# data/airports_id.csv sudah berisi hasil saringannya untuk Indonesia.
+airports.csv

@@ -42,6 +42,39 @@ def seed_if_empty():
         db.session.rollback()
 
 
+AIRPORT_CSV = Path(__file__).parent / "data" / "airports_id.csv"
+
+
+def ensure_airports():
+    """Tambahkan bandara Indonesia dari data/airports_id.csv yang belum ada di database.
+
+    Hanya menambah, tidak pernah mengubah atau menghapus: bandara yang sudah ada
+    (termasuk yang datanya dirapikan manual, mis. CGK atau HLM) dibiarkan apa adanya,
+    begitu juga rute yang sudah memakainya.
+    """
+    if not AIRPORT_CSV.exists():
+        print(f"[data] PERINGATAN: {AIRPORT_CSV.name} tidak ditemukan")
+        return 0
+    try:
+        have = {code for (code,) in db.session.query(Airport.code).all()}
+        added = 0
+        with AIRPORT_CSV.open(encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                code = (row["code"] or "").strip().upper()
+                name = (row["name"] or "").strip()
+                if not code or not name or code in have:
+                    continue
+                db.session.add(Airport(code=code, name=name,
+                                       lat=float(row["lat"]), lon=float(row["lon"])))
+                added += 1
+        db.session.commit()
+        return added
+    except Exception:
+        # Diisi lebih dulu oleh proses lain yang jalan bersamaan. Aman diabaikan.
+        db.session.rollback()
+        return 0
+
+
 def _save_row(a, b, nm, minutes, flights, year, quarter):
     """Simpan satu rute + penerbangan per hari (tambah baru, atau perbarui jika sudah ada)."""
     a, b = ALIAS.get(a, a), ALIAS.get(b, b)

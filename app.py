@@ -16,7 +16,7 @@ from sqlalchemy.engine import make_url
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from importer import TEMPLATE_CSV, import_csv, import_excel, seed_if_empty
+from importer import TEMPLATE_CSV, ensure_airports, import_csv, import_excel, seed_if_empty
 from models import Airport, Route, RouteFlight, User, db
 
 load_dotenv()  # baca file .env saat dijalankan di komputer sendiri
@@ -96,12 +96,30 @@ def ensure_admin():
     db.session.commit()
     print(f"[login] akun admin dibuat: {user}")
 
+# ---------- Persiapan database (dijalankan sekali saat aplikasi menyala) ----------
+_ready = False
 
-with app.app_context():
-    db.create_all()
-    ensure_columns()
-    ensure_admin()
-    seed_if_empty()
+
+def prepare_database():
+    """Buat tabel, tambah kolom baru, isi data contoh, dan tambahkan bandara Indonesia."""
+    global _ready
+    if _ready:
+        return
+    with app.app_context():
+        db.create_all()      # buat tabel jika belum ada
+        ensure_columns()     # tambah kolom baru jika tabel lama
+        seed_if_empty()      # isi data contoh jika masih kosong
+        added = ensure_airports()  # bandara Indonesia dari data/airports_id.csv
+        ensure_admin()       # pastikan akun admin dari ADMIN_USER ada
+    if added:
+        print(f"[data] {added} bandara Indonesia ditambahkan")
+    _ready = True
+
+
+@app.before_request
+def _prepare():
+    # dijalankan sekali per proses; sebelum_request juga bekerja di WSGI (Vercel/Render)
+    prepare_database()
 
 
 # ---------- Keamanan ----------
@@ -468,5 +486,5 @@ def template_csv():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=True)  # hanya untuk di komputer sendiri
+

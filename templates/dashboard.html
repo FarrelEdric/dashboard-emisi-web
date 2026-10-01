@@ -8,12 +8,21 @@
     />
     <title>Dashboard Emisi Karbon Penerbangan</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='img/favicon.png') }}"
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+      href="{{ url_for('static', filename='fonts/exo2.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='vendor/maplibre/maplibre-gl.css') }}"
     />
     <link
       rel="stylesheet"
@@ -26,7 +35,7 @@
         <div class="brand-mark">
           <img
             class="brand-logo"
-            src="https://www.airnavindonesia.co.id/wp-content/uploads/2024/09/LOGOAIRNAVINDONESIALandscape.png"
+            src="{{ url_for('static', filename='img/logo-airnav.png') }}"
             alt="AirNav Indonesia"
           />
         </div>
@@ -141,7 +150,18 @@
             </div>
 
             <div class="map"><div id="map"></div></div>
-            <p class="note">Klik garis rute di peta untuk memilih rute.</p>
+            <div class="map-foot">
+              <p class="note">
+                Pilih rute lewat Bandara asal dan Tujuan di atas, lalu klik
+                Tampilkan rute. Geser dan zoom peta seperti peta biasa; arahkan
+                kursor ke titik bandara untuk melihat namanya.
+              </p>
+              <label class="switch" for="ap-toggle">
+                <span>Titik bandara</span>
+                <input type="checkbox" id="ap-toggle" checked />
+                <i aria-hidden="true"></i>
+              </label>
+            </div>
             <section class="analysis-section">
               <div class="section-header">
                 <h2>CO₂ dikurangi per bulan</h2>
@@ -169,7 +189,9 @@
         </div>
       </section>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/maplibre/maplibre-gl.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/maplibre/leaflet-maplibre-gl.js') }}"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

@@ -8,8 +8,13 @@
     />
     <title>Admin | Dashboard Emisi Karbon</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap"
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='img/favicon.png') }}"
+    />
+    <link
       rel="stylesheet"
+      href="{{ url_for('static', filename='fonts/exo2.css') }}"
     />
     <link
       rel="stylesheet"
@@ -22,7 +27,7 @@
         <div class="brand-mark">
           <img
             class="brand-logo"
-            src="https://www.airnavindonesia.co.id/wp-content/uploads/2024/09/LOGOAIRNAVINDONESIALandscape.png"
+            src="{{ url_for('static', filename='img/logo-airnav.png') }}"
             alt="AirNav Indonesia"
           />
         </div>
